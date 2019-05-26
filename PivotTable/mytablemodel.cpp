@@ -7,7 +7,7 @@ myTableModel::myTableModel(QObject *parent)
 {
 }
 
-int myTableModel::rowCount(const QModelIndex &parent = QModelIndex()) const
+int myTableModel::rowCount(const QModelIndex &parent) const
 {
     Q_UNUSED(parent);
     return number_rows;

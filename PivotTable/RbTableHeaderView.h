@@ -82,12 +82,19 @@ public:
 	virtual bool setData(const QModelIndex & index, const QVariant & value, int role = Qt::EditRole);
 	virtual Qt::ItemFlags flags(const QModelIndex &index) const;
 
+    // my functions
+    void setBaseSectionSize(QSize size);
+    void setOrientation(Qt::Orientation orient);
+    void setSpan(int row, int column, int rowSpanCount, int columnSpanCount);
 private:
 	// properties
 	int row_count_prop;
 	int column_count_prop;
 	// inherent features
 	RbTableHeaderItem* root_item;
+
+    QSize baseSectionSize;
+    Qt::Orientation orientation;
 };
 
 
@@ -95,7 +102,8 @@ class RbTableHeaderView: public QHeaderView
 {
 	Q_OBJECT
 public:
-	RbTableHeaderView(Qt::Orientation orientation, int rows, int columns, QWidget* parent = 0);
+    RbTableHeaderView(Qt::Orientation orientation,QWidget* parent = nullptr);
+    RbTableHeaderView(Qt::Orientation orientation, int rows, int columns, QWidget* parent = nullptr);
 	virtual ~RbTableHeaderView();
 
 	void setRowHeight(int row, int rowHeight);
@@ -103,11 +111,12 @@ public:
 	void setSpan(int row, int column, int rowSpanCount, int columnSpanCount);
 	void setCellBackgroundColor(const QModelIndex& index, const QColor&);
 	void setCellForegroundColor(const QModelIndex& index, const QColor&);
+    QSize getBaseSectionSize() const;
 
 protected:
 	// override
 	virtual void mousePressEvent(QMouseEvent* event);
-	virtual QModelIndex indexAt(const QPoint&);
+    virtual QModelIndex indexAt(const QPoint&) const;
 	virtual void paintSection(QPainter* painter, const QRect& rect, int logicalIndex) const;
 	virtual QSize sectionSizeFromContents(int logicalIndex) const;
 
@@ -116,13 +125,16 @@ protected:
 	QModelIndex rowSpanIndex(const QModelIndex& currentIndex) const;
 	int columnSpanSize(int row, int from, int spanCount) const;
 	int rowSpanSize(int column, int from, int spanCount) const;
-	int getSectionRange(QModelIndex& index, int* beginSection, int* endSection) const;
+    int getSectionRange(QModelIndex& index, int* beginSection, int* endSection) const;
 
 protected Q_SLOTS:
 	void onSectionResized(int logicalIdx,int oldSize,int newSize);
 
 	Q_SIGNALS:
 	void sectionPressed(int from, int to);
+
+private:
+    QSize baseSectionSize;
 };
 
 #endif /* RBTABLEHEADERVIEW_H_ */

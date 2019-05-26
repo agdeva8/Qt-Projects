@@ -19,7 +19,7 @@ public:
     QTableView* my_table_view;
     myTableModel* my_table_model;
     QWidget* my_widget;
-    QHBoxLayout* layout;
+    QHBoxLayout* my_layout;
 };
 
 #endif // MAINWINDOW_H

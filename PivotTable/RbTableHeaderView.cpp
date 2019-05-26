@@ -25,6 +25,13 @@
 #include <QStandardItem>
 #include <QMouseEvent>
 #include <qdrawutil.h>
+#include <QFont>
+#include <QString>
+
+
+/****************************************************************************************************
+                                HEADER ITEM IMPLEMENTATION
+******************************************************************************************************/
 
 RbTableHeaderItem::RbTableHeaderItem(RbTableHeaderItem* parent):
    row_prop(0),column_prop(0),parent_item(parent)
@@ -88,15 +95,34 @@ void RbTableHeaderItem::clear()
 	 child_items.clear();
 }
 
+/****************************************************************************************************
+                                HEADER MODEL IMPLEMENTATION
+******************************************************************************************************/
+
 RbTableHeaderModel::RbTableHeaderModel(int rows, int cols, QObject* parent) :
 QAbstractTableModel(parent),row_count_prop(rows),column_count_prop(cols),root_item(new RbTableHeaderItem())
 {
+
 }
 
 RbTableHeaderModel::~RbTableHeaderModel()
 {
 	root_item->clear();
-	delete root_item;
+    delete root_item;
+}
+
+void RbTableHeaderModel::setBaseSectionSize(QSize size)
+{
+    baseSectionSize = size;
+
+    for (int row=0;row<row_count_prop;++row)
+        for (int col=0;col<column_count_prop;++col)
+            this->setData(this->index(row,col),baseSectionSize,Qt::SizeHintRole);
+}
+
+void RbTableHeaderModel::setOrientation(Qt::Orientation orient)
+{
+    orientation = orient;
 }
 
 QModelIndex RbTableHeaderModel::index(int row, int column, const QModelIndex & parent) const
@@ -110,8 +136,6 @@ QModelIndex RbTableHeaderModel::index(int row, int column, const QModelIndex & p
 	RbTableHeaderItem* childItem = parentItem->child(row,column);
 	if (!childItem) childItem = parentItem->insertChild(row,column);
 	return createIndex(row,column,childItem);
-
-	return QModelIndex();
 }
 
 QVariant RbTableHeaderModel::data(const QModelIndex& index, int role) const
@@ -154,12 +178,39 @@ bool RbTableHeaderModel::setData(const QModelIndex & index, const QVariant & val
 				 item->setData(span,ROW_SPAN_ROLE);
 			 }
 		 }
-		 else
-		 item->setData(value,role);
+         else if (role == Qt::DisplayRole)
+         {
+            item->setData(value, Qt::DisplayRole);
+
+            //TODO:: set SizeHintRole here only for each block
+//            QString str = value.toString();
+//            if(orientation == Qt::Horizontal)
+//            {
+//                QSize str_size(200, 40);
+//                item->setData(str_size, Qt::SizeHintRole);
+//            }
+//            else if(orientation == Qt::Vertical)
+//            {
+//                QSize str_size(50, str.length()*2);
+//                item->setData(str_size, Qt::SizeHintRole);
+//            }
+         }
+
+         else
+             item->setData(value,role);
 
 		return true;
 	}
 	return false;
+}
+
+void RbTableHeaderModel::setSpan(int row, int column, int rowSpanCount, int columnSpanCount)
+{
+    QModelIndex idx = index(row,column);
+    if (rowSpanCount > 0)
+        setData(idx,rowSpanCount,ROW_SPAN_ROLE);
+    if (columnSpanCount)
+        setData(idx,columnSpanCount,COLUMN_SPAN_ROLE);
 }
 
 Qt::ItemFlags RbTableHeaderModel::flags(const QModelIndex &index) const
@@ -170,10 +221,28 @@ Qt::ItemFlags RbTableHeaderModel::flags(const QModelIndex &index) const
 }
 
 
+/****************************************************************************************************
+                                HEADER VIEW IMPLEMENTATION
+******************************************************************************************************/
+
+RbTableHeaderView::RbTableHeaderView(Qt::Orientation orientation, QWidget *parent)
+                  : QHeaderView (orientation,parent)
+{
+    if (orientation == Qt::Horizontal)
+    {
+        baseSectionSize.setWidth(defaultSectionSize());
+        baseSectionSize.setHeight(20);
+    }
+    else
+    {
+        baseSectionSize.setWidth(50);
+        baseSectionSize.setHeight(defaultSectionSize());
+    }
+}
+
 RbTableHeaderView::RbTableHeaderView(Qt::Orientation orientation, int rows, int columns, QWidget* parent):
 		QHeaderView(orientation,parent)
 {
-	QSize baseSectionSize;
 	if (orientation == Qt::Horizontal)
 	{
 		baseSectionSize.setWidth(defaultSectionSize());
@@ -201,6 +270,12 @@ RbTableHeaderView::RbTableHeaderView(Qt::Orientation orientation, int rows, int 
 RbTableHeaderView::~RbTableHeaderView()
 {
 }
+
+QSize RbTableHeaderView::getBaseSectionSize() const
+{
+    return baseSectionSize;
+}
+
 
 void RbTableHeaderView::setRowHeight(int row, int rowHeight)
 {
@@ -302,7 +377,7 @@ void RbTableHeaderView::mousePressEvent(QMouseEvent* event)
 	}
 }
 
-QModelIndex RbTableHeaderView::indexAt(const QPoint& pos)
+QModelIndex RbTableHeaderView::indexAt(const QPoint& pos) const
 {
 	const RbTableHeaderModel* tblModel = qobject_cast<RbTableHeaderModel*>(this->model());
 	const int OTN = orientation();

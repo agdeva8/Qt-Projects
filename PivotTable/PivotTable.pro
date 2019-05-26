@@ -27,13 +27,13 @@ CONFIG += c++11
 SOURCES += \
         RbTableHeaderView.cpp \
         main.cpp \
-        mainwindow.cpp \
-        mytablemodel.cpp
+        mytablemodel.cpp \
+    mywindow.cpp
 
 HEADERS += \
         RbTableHeaderView.h \
-        mainwindow.h \
-        mytablemodel.h
+        mytablemodel.h \
+    mywindow.h
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

@@ -7,8 +7,8 @@ class myTableModel: public QAbstractTableModel
     Q_OBJECT
 public:
     myTableModel(QObject* parent = nullptr);
-    int rowCount(const QModelIndex &parent) const override;
-    int columnCount(const QModelIndex &parent) const override;
+    int rowCount(const QModelIndex &parent = QModelIndex()) const override;
+    int columnCount(const QModelIndex &parent = QModelIndex()) const override;
     QVariant data(const QModelIndex &index, int role) const override;
 
     bool insertRows(int row, int count, const QModelIndex &parent = QModelIndex()) override;
