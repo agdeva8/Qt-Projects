@@ -86,6 +86,7 @@ public:
     void setBaseSectionSize(QSize size);
     void setOrientation(Qt::Orientation orient);
     void setSpan(int row, int column, int rowSpanCount, int columnSpanCount);
+
 private:
 	// properties
 	int row_count_prop;
@@ -95,6 +96,8 @@ private:
 
     QSize baseSectionSize;
     Qt::Orientation orientation;
+
+    int *maxWidthArr;
 };
 
 

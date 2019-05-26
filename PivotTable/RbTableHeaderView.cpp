@@ -27,7 +27,7 @@
 #include <qdrawutil.h>
 #include <QFont>
 #include <QString>
-
+#include <QDebug>
 
 /****************************************************************************************************
                                 HEADER ITEM IMPLEMENTATION
@@ -102,22 +102,37 @@ void RbTableHeaderItem::clear()
 RbTableHeaderModel::RbTableHeaderModel(int rows, int cols, QObject* parent) :
 QAbstractTableModel(parent),row_count_prop(rows),column_count_prop(cols),root_item(new RbTableHeaderItem())
 {
-
+    maxWidthArr = new int[column_count_prop];
+    for(int col=0; col<column_count_prop; col++)
+        maxWidthArr[col] = 0;
 }
 
 RbTableHeaderModel::~RbTableHeaderModel()
 {
 	root_item->clear();
     delete root_item;
+    delete maxWidthArr;
 }
 
 void RbTableHeaderModel::setBaseSectionSize(QSize size)
 {
     baseSectionSize = size;
 
+    if(orientation == Qt::Vertical){
+        for (int row=0;row<row_count_prop;++row)
+            for (int col=0;col<column_count_prop;++col)
+            {
+                baseSectionSize.setWidth(maxWidthArr[col]);
+                this->setData(this->index(row,col),baseSectionSize,Qt::SizeHintRole);
+            }
+        return;
+    }
+
     for (int row=0;row<row_count_prop;++row)
         for (int col=0;col<column_count_prop;++col)
+        {
             this->setData(this->index(row,col),baseSectionSize,Qt::SizeHintRole);
+        }
 }
 
 void RbTableHeaderModel::setOrientation(Qt::Orientation orient)
@@ -178,22 +193,18 @@ bool RbTableHeaderModel::setData(const QModelIndex & index, const QVariant & val
 				 item->setData(span,ROW_SPAN_ROLE);
 			 }
 		 }
-         else if (role == Qt::DisplayRole)
+         else if (role == Qt::DisplayRole || role == Qt::EditRole)
          {
-            item->setData(value, Qt::DisplayRole);
 
-            //TODO:: set SizeHintRole here only for each block
-//            QString str = value.toString();
-//            if(orientation == Qt::Horizontal)
-//            {
-//                QSize str_size(200, 40);
-//                item->setData(str_size, Qt::SizeHintRole);
-//            }
-//            else if(orientation == Qt::Vertical)
-//            {
-//                QSize str_size(50, str.length()*2);
-//                item->setData(str_size, Qt::SizeHintRole);
-//            }
+            item->setData(value, role);
+
+            if(orientation == Qt::Vertical)
+            {
+                int width = value.toString().length()*7;
+                int col = index.column();
+                if(width > maxWidthArr[col])
+                    maxWidthArr[col] = width;
+            }
          }
 
          else
@@ -212,6 +223,8 @@ void RbTableHeaderModel::setSpan(int row, int column, int rowSpanCount, int colu
     if (columnSpanCount)
         setData(idx,columnSpanCount,COLUMN_SPAN_ROLE);
 }
+
+
 
 Qt::ItemFlags RbTableHeaderModel::flags(const QModelIndex &index) const
 {
@@ -250,8 +263,8 @@ RbTableHeaderView::RbTableHeaderView(Qt::Orientation orientation, int rows, int 
 	}
 	else
 	{
-		baseSectionSize.setWidth(50);
-		baseSectionSize.setHeight(defaultSectionSize());
+        baseSectionSize.setWidth(50);
+        baseSectionSize.setHeight(defaultSectionSize());
 	}
 
     // create header model

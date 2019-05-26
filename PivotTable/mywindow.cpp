@@ -48,17 +48,15 @@ myWindow::myWindow(QWidget* parent)
     RbTableHeaderModel* horizontal_header_model = new RbTableHeaderModel(3,number_cols+1);
     RbTableHeaderModel* vertical_header_model = new RbTableHeaderModel(number_rows+1,3);
 
-    horizontal_header_model->setBaseSectionSize(horizontal_header_view->getBaseSectionSize());
-    vertical_header_model->setBaseSectionSize(vertical_header_view->getBaseSectionSize());
 
     //    horizontal_header_model->setOrientation(Qt::Horizontal);
-    //    vertical_header_model->setOrientation(Qt::Vertical);
+        vertical_header_model->setOrientation(Qt::Vertical);
 
     horizontal_header_view->setModel(horizontal_header_model);
     vertical_header_view->setModel(vertical_header_model);
 
-//    horizontal_header_view->setSectionResizeMode(QHeaderView::ResizeToContents);
-//    vertical_header_view->setSectionResizeMode(QHeaderView::ResizeToContents);
+    horizontal_header_view->setSectionResizeMode(QHeaderView::ResizeToContents);
+    vertical_header_view->setSectionResizeMode(QHeaderView::ResizeToContents);
 
     horizontal_header_view->setSectionsClickable(true);
     vertical_header_view->setSectionsClickable(true);
@@ -95,6 +93,8 @@ myWindow::myWindow(QWidget* parent)
     vertical_header_model->setData(vertical_header_model->index(2,2),QString("layer 2 cell 3"),Qt::DisplayRole);
     vertical_header_model->setData(vertical_header_model->index(3,2),QString("layer 2 cell 4"),Qt::DisplayRole);
 
+    horizontal_header_model->setBaseSectionSize(horizontal_header_view->getBaseSectionSize());
+    vertical_header_model->setBaseSectionSize(vertical_header_view->getBaseSectionSize());
 
     my_table_view->setHorizontalHeader(horizontal_header_view);
     my_table_view->setVerticalHeader(vertical_header_view);
